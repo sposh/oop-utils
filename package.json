@@ -1,0 +1,31 @@
+{
+    "name": "@sposh/oop-utils",
+    "version": "1.0.0",
+    "description": "Helper utilities for handling objects and object-oriented programming.",
+    "keywords": [
+        "object oriented programming",
+        "oop"
+    ],
+    "homepage": "https://github.com/sposh/oop-utils/wiki",
+    "bugs": "https://github.com/sposh/oop-utils/issues",
+    "license": "GPL-3.0-only",
+    "author": "Joshua Hewitt aka Sposh",
+    "main": "index.js",
+    "repository": "github:sposh/oop-utils",
+    "scripts": {
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+        "clean": "rimraf node_modules"
+    },
+    "config": {
+        "engine-strict": true
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "rimraf": "^5.0.5",
+        "winston": "^3.11.0"
+    },
+    "engines": {
+        "node": ">=16"
+    },
+    "type": "module"
+}
