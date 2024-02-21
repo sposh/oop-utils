@@ -66,15 +66,3 @@ export function createFromPrototype(resolver, basePrototype) {
     logger.debug('createFromPrototype create non-promise');
     return createInstance(prototype);
 }
-
-export function createFromProxy(resolver, proxy) {
-    logger.debug('createFromProxy');
-    const instance = proxy;
-    // TODO Set up called promises & async iterators
-    (async function() {
-        Object.setPrototypeOf(instance, await resolver.call(resolver))
-        // const realInstance = createInstance(await resolver.call(resolver));
-        // getAllPropertyNames(realInstance).forEach(propertyName => instance[propertyName] = realInstance[propertyName]);
-    }());
-    return instance;
-}
