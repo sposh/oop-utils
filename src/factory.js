@@ -11,7 +11,7 @@ export function createInstance(prototype, ...params) { // TODO Test if this stil
         return new prototype(...params);
     } else if (prototype !== null && typeof prototype === 'object' && typeof prototype.constructor === 'function' && typeof prototype.__proto__ === 'object') {
         logger.debug('utils.oop createInstance with Object.create');
-        return Object.create(prototype, params);
+        return Object.create(prototype, ...params);
     }
     logger.warn('utils.oop createInstance undefined');
 }
@@ -20,20 +20,20 @@ export function createInstance(prototype, ...params) { // TODO Test if this stil
 export function createFromPrototype(basePrototype, resolver, ...params) {
     logger.debug('createFromPrototype');
     const prototype = resolver.call(resolver);
-    if (prototype instanceof Promise) {
+    if (typeof prototype.then === 'function') { // TODO Investigate why combination of Node/Jest/import/then returns false for prototype instanceof Promise
         if (basePrototype) {
             let instance = createInstance(basePrototype);
             let resolvedInstance;
             getAllFunctionNames(instance).forEach(functionName => { // TODO Use Proxy/Reflect if it works with private methods?
                 logger.silly(`createFromPrototype create shifted promise overwriting method ${functionName}`);
-                instance[functionName] = async function (...params) { // TODO Does function name appear in logs and stack traces?
+                instance[functionName] = async function (...functionParams) { // TODO Does function name appear in logs and stack traces?
                     logger.silly(`createFromPrototype create shifted promise called method ${functionName}`);
-                    if (resolvedInstance === undefined) {
+                    if (resolvedInstance === undefined) { // FIXME Creates new instances until resolved
                         logger.silly(`createFromPrototype create shifted promise called method promise return create new instance ${functionName}`);
                         resolvedInstance = createInstance(await prototype, ...params);
                     }
                     logger.silly(`createFromPrototype create shifted promise called promise resolves joined promise-promise ${functionName}`);
-                    return await resolvedInstance[functionName].call(resolvedInstance, ...params); // Use Promise.allSettled?
+                    return await resolvedInstance[functionName].call(resolvedInstance, ...functionParams); // Use Promise.allSettled?
                 }
                 /* instance[functionName] = function (...params) { // TODO Does function name appear in logs and stack traces?
                     // TODO Might improve readability if we extract this to a separate async function
