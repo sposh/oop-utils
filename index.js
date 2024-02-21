@@ -1,3 +1,3 @@
-export { abstractMethod } from './src/abstract';
-export { createInstance, createFromPrototype } from './src/factory';
-export { getAllPropertyNames, getAllFunctionNames, getAllGetterNames } from './src/reflection';
+export * from './src/abstract';
+export * from './src/factory';
+export * from './src/reflection';
