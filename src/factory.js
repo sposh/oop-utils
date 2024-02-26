@@ -16,7 +16,7 @@ export function createInstance(prototype, ...params) { // TODO Test if this stil
     logger.warn('utils.oop createInstance undefined');
 }
 
-// TODO JSDoc: for shift-right Promise 1st call needs to be to interface, subsequent could be to implementation
+// TODO JSDoc: for shift-right Promise 1st call needs to be to interface, subsequent could be to implementation; careful about race conditions: generally call await on all operations
 export function createFromPrototype(basePrototype, resolver, ...params) {
     logger.debug('createFromPrototype');
     const prototype = resolver.call(resolver);
