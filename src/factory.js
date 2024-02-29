@@ -20,49 +20,37 @@ export function createInstance(prototype, ...params) { // TODO Test if this stil
 export function createFromPrototype(basePrototype, resolver, ...params) {
     logger.debug('createFromPrototype');
     const prototype = resolver.call(resolver);
-    if (typeof prototype.then === 'function') { // TODO Investigate why combination of Node/Jest/import/then returns false for prototype instanceof Promise
-        if (basePrototype) {
-            let instance = createInstance(basePrototype);
-            let resolvedInstance;
-            getAllFunctionNames(instance).forEach(functionName => { // TODO Use Proxy/Reflect if it works with private methods?
-                logger.silly(`createFromPrototype create shifted promise overwriting method ${functionName}`);
-                instance[functionName] = async function (...functionParams) { // TODO Does function name appear in logs and stack traces?
-                    logger.silly(`createFromPrototype create shifted promise called method ${functionName}`);
-                    if (resolvedInstance === undefined) { // FIXME Creates new instances until resolved
-                        logger.silly(`createFromPrototype create shifted promise called method promise return create new instance ${functionName}`);
-                        resolvedInstance = createInstance(await prototype, ...params);
-                    }
-                    logger.silly(`createFromPrototype create shifted promise called promise resolves joined promise-promise ${functionName}`);
+    const instance = createInstance(basePrototype);
+    // TODO if (!instance) & (typeof prototype.then !== 'function') return createInstance (need to reorder control flow)
+    let resolvedInstance;
+    if (typeof prototype.then !== 'function') {
+        resolvedInstance = createInstance(prototype, ...params);
+    }
+    getAllFunctionNames(instance).forEach(functionName => { // TODO Use Proxy/Reflect if it works with private methods?
+        if (typeof prototype.then === 'function') { // TODO Investigate why combination of Node/Jest/import/then returns false for prototype instanceof Promise
+            logger.silly(`createFromPrototype create shifted promise overwriting method ${functionName}`);
+            instance[functionName] = async function (...functionParams) { // TODO Does function name appear in logs and stack traces?
+                logger.silly(`createFromPrototype create shifted promise called method ${functionName}`);
+                if (resolvedInstance === undefined) {
+                    logger.silly(`createFromPrototype create shifted promise called method promise return create new instance ${functionName}`);
+                    resolvedInstance = createInstance(await prototype, ...params);
+                }
+                logger.silly(`createFromPrototype create shifted promise called promise resolves joined promise-promise ${functionName}`);
+                if (typeof resolvedInstance[functionName] === 'function') {
                     return await resolvedInstance[functionName].call(resolvedInstance, ...functionParams); // Use Promise.allSettled?
                 }
-                /* instance[functionName] = function (...params) { // TODO Does function name appear in logs and stack traces?
-                    // TODO Might improve readability if we extract this to a separate async function
-                    return new Promise(resolve => prototype.then(resolvedPrototype => { // TODO Promise reject?
-                        if (resolvedInstance === undefined) {
-                            resolvedInstance = createInstance(resolvedPrototype, ...params);
-                            instance = { ...resolvedInstance, ...instance }; // TODO Do we need deep merge?
-                        }
-                        const originalReturn = resolvedInstance[functionName].call(resolvedInstance, ...params);
-                        if (originalReturn instanceof Promise) {
-                            originalReturn.then(resolvedReturn => resolve(resolvedReturn));
-                        } else {
-                            resolve(originalReturn);
-                        }
-                    }));
-                } */ // TODO Delete
-            });
-            logger.debug('createFromPrototype create shifted promise');
-            return instance;
-            // TODO Delete
-            // return (async () => createInstance(await prototype, ...params))();
-            // // return new Promise(resolve => prototype.then(resolvedPrototype => resolve(createInstance(resolvedPrototype, ...params)))); // TODO Delete
+                throw new Error(`[@sposh/oop-utils]factory.createFromPrototype: expected basePrototype '${basePrototype}' function '${functionName}' not implemented in resolvedInstance '${resolvedInstance}'`);
+            }
         } else {
-            return async function() {
-                logger.debug('createFromPrototype create unshifted promise');
-                return createInstance(await prototype, ...params);
-            }();
+            logger.silly(`createFromPrototype overwriting method ${functionName}`);
+            instance[functionName] = function (...functionParams) { // TODO Does function name appear in logs and stack traces?
+                if (typeof resolvedInstance[functionName] === 'function') {
+                    return resolvedInstance[functionName].call(resolvedInstance, ...functionParams);
+                }
+                throw new Error(`[@sposh/oop-utils]factory.createFromPrototype: expected basePrototype '${basePrototype}' function '${functionName}' not implemented in resolvedInstance '${prototype}'`);
+            }
         }
-    }
-    logger.debug('createFromPrototype create non-promise');
-    return createInstance(prototype, ...params);
+    });
+    logger.debug('createFromPrototype create shifted promise');
+    return instance;
 }
