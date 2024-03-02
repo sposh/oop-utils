@@ -16,6 +16,7 @@ export function createInstance(prototype, ...params) { // TODO Test if this stil
     logger.warn('utils.oop createInstance undefined');
 }
 
+// TODO: also overwrite getters, setters, properties & symbls/iterators; more tests in di project
 // TODO JSDoc: for shift-right Promise 1st call needs to be to interface, subsequent could be to implementation; careful about race conditions: generally call await on all operations
 export function createFromPrototype(basePrototype, resolver, ...params) {
     logger.debug('createFromPrototype');
@@ -23,7 +24,7 @@ export function createFromPrototype(basePrototype, resolver, ...params) {
     const instance = createInstance(basePrototype);
     // TODO if (!instance) & (typeof prototype.then !== 'function') return createInstance (need to reorder control flow)
     let resolvedInstance;
-    if (typeof prototype.then !== 'function') {
+    if (typeof prototype.then !== 'function') { // TODO Move promise to createInstance
         resolvedInstance = createInstance(prototype, ...params);
     }
     getAllFunctionNames(instance).forEach(functionName => { // TODO Use Proxy/Reflect if it works with private methods?
@@ -39,7 +40,7 @@ export function createFromPrototype(basePrototype, resolver, ...params) {
                 if (typeof resolvedInstance[functionName] === 'function') {
                     return await resolvedInstance[functionName].call(resolvedInstance, ...functionParams); // Use Promise.allSettled?
                 }
-                throw new Error(`[@sposh/oop-utils]factory.createFromPrototype: expected basePrototype '${basePrototype}' function '${functionName}' not implemented in resolvedInstance '${resolvedInstance}'`);
+                throw new Error(`[@sposh/oop-utils]factory.createFromPrototype: expected basePrototype '${basePrototype.constructor ? basePrototype.constructor.name: basePrototype}' function '${functionName}' not implemented in resolvedInstance '${resolvedInstance.constructor ? resolvedInstance.constructor.name: resolvedInstance}'`);
             }
         } else {
             logger.silly(`createFromPrototype overwriting method ${functionName}`);
@@ -47,7 +48,7 @@ export function createFromPrototype(basePrototype, resolver, ...params) {
                 if (typeof resolvedInstance[functionName] === 'function') {
                     return resolvedInstance[functionName].call(resolvedInstance, ...functionParams);
                 }
-                throw new Error(`[@sposh/oop-utils]factory.createFromPrototype: expected basePrototype '${basePrototype}' function '${functionName}' not implemented in resolvedInstance '${prototype}'`);
+                throw new Error(`[@sposh/oop-utils]factory.createFromPrototype: expected basePrototype '${basePrototype.constructor ? basePrototype.constructor.name: basePrototype}' function '${functionName}' not implemented in resolvedInstance '${prototype.constructor ? prototype.constructor.name: prototype}'`);
             }
         }
     });
