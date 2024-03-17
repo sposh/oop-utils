@@ -19,8 +19,7 @@
   },
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "clean": "rimraf node_modules dist",
-    "publish": "npm publish --access public"
+    "clean": "rimraf node_modules"
   },
   "config": {
     "engine-strict": true
