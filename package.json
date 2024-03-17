@@ -20,8 +20,7 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "clean": "rimraf node_modules dist",
-    "build": "rimraf dist && mkdir dist && cp -r index.js LICENSE src dist",
-    "publish": "npm run build && npm publish dist --access public"
+    "publish": "npm publish --access public"
   },
   "config": {
     "engine-strict": true
