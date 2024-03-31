@@ -1,3 +1,3 @@
-export * from './src/abstract';
-export * from './src/factory';
-export * from './src/reflection';
+export * from './src/abstract.js';
+export * from './src/factory.js';
+export * from './src/reflection.js';
