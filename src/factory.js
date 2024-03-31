@@ -1,6 +1,6 @@
 // TODO Use https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
-import logger from './logger';
-import { getAllFunctionNames } from './reflection';
+import logger from './logger.js';
+import { getAllFunctionNames } from './reflection.js';
 
 /**
  * Create an instance from a prototype or a class
